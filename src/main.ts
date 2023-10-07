@@ -55,7 +55,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 const code = {
   value: `
 float getValue(float x, float y, float t) {
-  return (x * y) * .16 + t;
+  return (x * y) * 1.8 + t * .1;
 }
 `,
   draw: (..._: any[]) => { },
@@ -135,7 +135,7 @@ const getDraw = (code: string, coeffs: number[][]) => {
   precision mediump float;
 
   #define PI 3.1415926538
-  #define SIZE 32.0
+  #define SIZE 128.0
   #define BAYER_SIZE 2.0
   varying vec2 uv;
   uniform float time;
@@ -156,17 +156,17 @@ const getDraw = (code: string, coeffs: number[][]) => {
   }
 
   void main () {
-    float x = floor(uv.x * SIZE);
-    float y = floor(-uv.y * SIZE);
+    float x = floor(uv.x * SIZE) / SIZE;
+    float y = floor(-uv.y * SIZE) / SIZE;
     float t = time * 3.;
     float i = x * SIZE * 2. + y;
 
     float bayerValue = texture2D(bayer, vec2(
-      mod(uv.x * 128., BAYER_SIZE * 1.0) / BAYER_SIZE * 1.,
-      mod(uv.y * 128., BAYER_SIZE * 1.0) / BAYER_SIZE * 1.
+      mod(uv.x * 256., BAYER_SIZE * 1.0) / BAYER_SIZE * 1.,
+      mod(uv.y * 256., BAYER_SIZE * 1.0) / BAYER_SIZE * 1.
     )).r / 1.;
 
-    float value = mod((getValue(x, y, t)) / 16. + bayerValue, 1.0);
+    float value = mod((getValue(x, y, t)) + bayerValue, 1.0);
     gl_FragColor = vec4(pal(value, coeffsA, coeffsB, coeffsC, coeffsD), 1);
   }
     `,

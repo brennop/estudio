@@ -116,12 +116,19 @@ button:focus-visible {
   left: 8px;
   width: 320px;
 
+  overflow: auto;
+  max-height: calc(100vh - 64px);
+
   z-index: 1;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
 
 .editor:hover {
+  opacity: 1;
+}
+
+.editor:focus {
   opacity: 1;
 }
 
