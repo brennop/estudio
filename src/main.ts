@@ -1,14 +1,23 @@
 import "./style.css";
 import createREGL from "regl";
-import * as EditorPlugin from "./editor"
+import { CodeJar } from "codejar";
 
 import { Pane } from "tweakpane";
-
-const letters = "abcdefghijklmnopqrsuvwz".split("");
+import { BindingApi } from "@tweakpane/core";
 
 const regl = createREGL();
 
-const coeffs = [[1.000, 0.500, 0.500], [0.500, 0.500, 0.500], [0.750, 1.000, 0.667], [0.800, 1.000, 0.333]]
+const pallete = [
+  `[[0.938 0.328 0.718] [0.659 0.438 0.328] [0.388 0.388 0.296] [2.538 2.478 0.168]]`,
+  `[[0.500 0.500 0.500] [0.500 0.500 0.500] [0.800 0.800 0.500] [0.000 0.200 0.500]]`
+]
+
+const getCoeffs = (str: string) => str.match(/\d+\.\d+/g)?.map((n) => parseFloat(n))?.reduce((acc, n, i) => {
+  const index = Math.floor(i / 3);
+  acc[index] = acc[index] || [];
+  acc[index].push(n);
+  return acc;
+}, [] as number[][]);
 
 const bayerMatrix = [
   [0, 8, 2, 10],
@@ -38,26 +47,84 @@ export const palette = [
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
+    <div class="editor"></div>
   </div>
 `;
 
 const code = {
-  value: `((x * y) * .16 + t)`,
+  value: `
+float getValue(float x, float y, float t) {
+  return (x * y) * .16 + t;
+}
+`,
   draw: (..._: any[]) => { },
+  pallette: pallete[0]
 };
 
 const params = {} as any;
+const bindings: Record<string, BindingApi> = {}
 
 const pane = new Pane();
-
-pane.registerPlugin(EditorPlugin);
-
-pane.addBinding(code, "value", { view: "editor" }).on("change", (event) => {
-  const value = event.value as string;
-  code.draw = getDraw(value);
+pane.addBinding(code, "pallette", {
+  options: Object.fromEntries(pallete.map((p, i) => [i, p])),
+}).on("change", (e) => {
+  code.draw = getDraw(code.value, getCoeffs(e.value)!);
 });
 
-const getDraw = (code: string) => {
+const editor = CodeJar(document.querySelector(".editor")!, () => { })
+
+editor.updateCode(code.value);
+
+editor.onUpdate((value) => {
+  try {
+    const coeffs = getCoeffs(code.pallette);
+    code.draw = getDraw(value, coeffs!);
+    code.value = value;
+
+    // capture type and name of uniforms
+    const uniforms = value.match(/uniform\s+(float|vec2|vec3|vec4)\s+(\w+)/g)?.map((line) => {
+      const [_, type, name] = line.match(/uniform\s+(float|vec2|vec3|vec4)\s+(\w+)/)!;
+      return { type, name };
+    });
+
+    console.log(uniforms);
+
+    // add uniforms to pane
+    uniforms?.forEach(({ type, name }) => {
+      if (params[name] == null) {
+        switch (type) {
+          case "float":
+            params[name] = 0;
+            break;
+          case "vec2":
+            params[name] = { x: 0, y: 0 };
+            break;
+          case "vec3":
+            params[name] = { x: 0, y: 0, z: 0 };
+            break;
+          case "vec4":
+            params[name] = { r: 0, g: 0, b: 0, a: 0 };
+            break;
+        }
+
+        bindings[name] = pane.addBinding(params, name);
+      }
+    });
+
+    // remove uniforms from pane
+    Object.entries(bindings).forEach(([name, binding]) => {
+      if (!uniforms?.find((u) => u.name === name)) {
+        binding.dispose();
+        params[name] = null;
+      }
+    });
+
+    pane.refresh();
+  } catch (e) {
+  }
+});
+
+const getDraw = (code: string, coeffs: number[][]) => {
   const uniforms = Object.fromEntries(
     Object.keys(params).map((key) => [key, regl.prop(key)])
   );
@@ -65,8 +132,6 @@ const getDraw = (code: string) => {
   return regl({
     frag: `
   precision mediump float;
-
-  ${Object.keys(params).map((key) => `uniform float ${key};`).join("\n")}
 
   #define PI 3.1415926538
   #define SIZE 32.0
@@ -81,8 +146,11 @@ const getDraw = (code: string) => {
   uniform vec3 coeffsC;
   uniform vec3 coeffsD;
 
+  ${code}
+
   vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
   {
+      t = floor(t * 8.0) / 8.0;
       return a + b*cos( 6.28318*(c*t+d) );
   }
 
@@ -97,8 +165,8 @@ const getDraw = (code: string) => {
       mod(uv.y * 128., BAYER_SIZE * 1.0) / BAYER_SIZE * 1.
     )).r / 1.;
 
-    float value = mod((${code}) / 16. + bayerValue, 1.0);
-    gl_FragColor = vec4(pal(value, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25)), 1);
+    float value = mod((getValue(x, y, t)) / 16. + bayerValue, 1.0);
+    gl_FragColor = vec4(pal(value, coeffsA, coeffsB, coeffsC, coeffsD), 1);
   }
     `,
     vert: `
@@ -134,12 +202,42 @@ const getDraw = (code: string) => {
   });
 };
 
-code.draw = getDraw(code.value);
+code.draw = getDraw(code.value, getCoeffs(pallete[0])!);
 
 regl.frame(() => {
   regl.clear({
     color: [0, 0, 0, 1],
   });
 
-  code.draw(params);
+  const _params = Object.fromEntries(
+    Object.entries(params).map(([key, value]) => {
+      if (typeof value === "number") {
+        return [key, value];
+      }
+
+      if (typeof value !== "object") {
+        return [key, value];
+      }
+
+      if (value == null) {
+        return [key, value];
+      }
+
+      if ("z" in value) {
+        return [key, [value.x, value.y, value.z]];
+      }
+
+      if ("a" in value) {
+        return [key, [value.r, value.g, value.b, value.a]];
+      }
+
+      if ("y" in value) {
+        return [key, [value.x, value.y]];
+      }
+
+      return [key, value];
+    })
+  );
+
+  code.draw(_params);
 });
