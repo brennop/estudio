@@ -117,4 +117,21 @@ button:focus-visible {
   width: 320px;
 
   z-index: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
+
+.editor:hover {
+  opacity: 1;
+}
+
+.tp-dfwv {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.tp-dfwv:hover {
+  opacity: 1;
+}
+
+
