@@ -112,10 +112,20 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.18.20.tgz#786c5f41f043b07afb1af37683d7c33668858f6d"
   integrity sha512-kTdfRcSiDfQca/y9QIkng02avJ+NCaQvrMejlsB3RRv5sE9rRoeBPISaZpKxHELzRxZyLvNts1P27W3wV+8geQ==
 
+"@pangenerator/tweakpane-textarea-plugin@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@pangenerator/tweakpane-textarea-plugin/-/tweakpane-textarea-plugin-1.0.4.tgz#5addc669b261da9610370b5429b0b3e1c1955a3e"
+  integrity sha512-fVQJBT456ssOFVcJiqduzQVLVqw4lAItx6hwaVOsUe9+hyKFhWUqcHi93lGcGOtDz3YhSKhfyIJPKOzwTCNiGw==
+
 "@tweakpane/core@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@tweakpane/core/-/core-2.0.1.tgz#358d4396d65ae7787e5c92601f6cf657dcb2833b"
   integrity sha512-iJNrLrLffQR0I8mWgAWcMVO9ZPNdNeXZl66WNT+Op5L9FW7BSF6lwG3izR6Ki9CaI3HzIownwjzYS5xWUaokTA==
+
+codejar@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/codejar/-/codejar-4.2.0.tgz#ad72aa63f794a16900a1b079eaf44acae84460ca"
+  integrity sha512-U8OZe+2B400W5nSSbXxaoboBN5i1hxWdBZJ9kcTy0DBuc4muwkPE/ph/MGX4yooIE8hztfNLPNU1CbcNYch69A==
 
 esbuild@^0.18.10:
   version "0.18.20"

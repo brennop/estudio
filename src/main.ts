@@ -1,11 +1,14 @@
 import "./style.css";
 import createREGL from "regl";
+import * as EditorPlugin from "./editor"
 
 import { Pane } from "tweakpane";
 
 const letters = "abcdefghijklmnopqrsuvwz".split("");
 
 const regl = createREGL();
+
+const coeffs = [[1.000, 0.500, 0.500], [0.500, 0.500, 0.500], [0.750, 1.000, 0.667], [0.800, 1.000, 0.333]]
 
 const bayerMatrix = [
   [0, 8, 2, 10],
@@ -47,19 +50,9 @@ const params = {} as any;
 
 const pane = new Pane();
 
-const btn = pane.addButton({
-  title: "add",
-});
+pane.registerPlugin(EditorPlugin);
 
-btn.on("click", () => {
-  const name = letters.shift();
-  if (!name) return;
-
-  params[name] = 0;
-  pane.addBinding(params, name);
-});
-
-pane.addBinding(code, "value", {}).on("change", (event) => {
+pane.addBinding(code, "value", { view: "editor" }).on("change", (event) => {
   const value = event.value as string;
   code.draw = getDraw(value);
 });
@@ -83,6 +76,16 @@ const getDraw = (code: string) => {
   uniform sampler2D palette; // 16 colors
   uniform sampler2D bayer; // 8x8 bayer matrix
 
+  uniform vec3 coeffsA;
+  uniform vec3 coeffsB;
+  uniform vec3 coeffsC;
+  uniform vec3 coeffsD;
+
+  vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
+  {
+      return a + b*cos( 6.28318*(c*t+d) );
+  }
+
   void main () {
     float x = floor(uv.x * SIZE);
     float y = floor(-uv.y * SIZE);
@@ -95,7 +98,7 @@ const getDraw = (code: string) => {
     )).r / 1.;
 
     float value = mod((${code}) / 16. + bayerValue, 1.0);
-    gl_FragColor = texture2D(palette, vec2(value, 0.0));
+    gl_FragColor = vec4(pal(value, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25)), 1);
   }
     `,
     vert: `
@@ -121,6 +124,10 @@ const getDraw = (code: string) => {
       time: regl.context("time"),
       palette: regl.texture([palette]),
       bayer: regl.texture(bayerMatrix),
+      coeffsA: coeffs[0],
+      coeffsB: coeffs[1],
+      coeffsC: coeffs[2],
+      coeffsD: coeffs[3],
       ...uniforms,
     },
     count: 6,
