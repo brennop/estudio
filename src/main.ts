@@ -1,6 +1,7 @@
 import "./style.css";
 import createREGL from "regl";
 import { CodeJar } from "codejar";
+import {save} from "./download";
 
 import { Pane } from "tweakpane";
 import { BindingApi } from "@tweakpane/core";
@@ -11,6 +12,8 @@ const pallete = [
   `[[0.938 0.328 0.718] [0.659 0.438 0.328] [0.388 0.388 0.296] [2.538 2.478 0.168]]`,
   `[[0.500 0.500 0.500] [0.500 0.500 0.500] [0.800 0.800 0.500] [0.000 0.200 0.500]]`,
   `[[0.875 0.588 0.296] [0.631 0.257 0.647] [1.408 0.773 1.364] [4.417 3.357 2.216]]`,
+  `[[0.938 0.328 0.248] [0.659 0.438 0.328] [0.388 0.388 0.018] [3.538 3.478 1.178]]`,
+  `[[0.698 0.338 0.158] [0.358 0.438 0.268] [0.518 0.388 -0.382] [2.558 2.558 -0.902]]`,
 ]
 
 const getCoeffs = (str: string) => str.match(/\d+\.\d+/g)?.map((n) => parseFloat(n))?.reduce((acc, n, i) => {
@@ -59,18 +62,33 @@ float getValue(float x, float y, float t) {
 }
 `,
   draw: (..._: any[]) => { },
-  pallette: pallete[0]
+  pallette: pallete[0],
+  resolution: 7,
 };
 
 const params = {} as any;
 const bindings: Record<string, BindingApi> = {}
 
 const pane = new Pane();
+
+pane.addButton({
+  title: "Save",
+}).on("click", () => {
+  const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
+  save(canvas, 5000);
+});
+
 pane.addBinding(code, "pallette", {
   options: Object.fromEntries(pallete.map((p, i) => [i, p])),
 }).on("change", (e) => {
   code.draw = getDraw(code.value, getCoeffs(e.value)!);
 });
+
+pane.addBinding(code, "resolution", {
+  min: 4,
+  max: 9,
+  step: 1,
+})
 
 const editor = CodeJar(document.querySelector(".editor")!, () => { })
 
@@ -135,12 +153,13 @@ const getDraw = (code: string, coeffs: number[][]) => {
   precision mediump float;
 
   #define PI 3.1415926538
-  #define SIZE 128.0
-  #define BAYER_SIZE 2.0
+  #define BAYER_SIZE 4.0
   varying vec2 uv;
   uniform float time;
   uniform sampler2D palette; // 16 colors
   uniform sampler2D bayer; // 8x8 bayer matrix
+  uniform float resolution;
+  #define SIZE resolution
 
   uniform vec3 coeffsA;
   uniform vec3 coeffsB;
@@ -197,6 +216,7 @@ const getDraw = (code: string, coeffs: number[][]) => {
       coeffsB: coeffs[1],
       coeffsC: coeffs[2],
       coeffsD: coeffs[3],
+      resolution: regl.prop("resolution"),
       ...uniforms,
     },
     count: 6,
@@ -239,6 +259,8 @@ regl.frame(() => {
       return [key, value];
     })
   );
+
+  _params.resolution = Math.pow(2, code.resolution);
 
   code.draw(_params);
 });

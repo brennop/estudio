@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@pangenerator/tweakpane-textarea-plugin": "^1.0.4",
+    "canvas2video": "^1.1.4",
     "codejar": "^4.2.0",
     "regl": "^2.1.0",
     "tweakpane": "^4.0.1"

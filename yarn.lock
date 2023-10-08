@@ -122,6 +122,11 @@
   resolved "https://registry.yarnpkg.com/@tweakpane/core/-/core-2.0.1.tgz#358d4396d65ae7787e5c92601f6cf657dcb2833b"
   integrity sha512-iJNrLrLffQR0I8mWgAWcMVO9ZPNdNeXZl66WNT+Op5L9FW7BSF6lwG3izR6Ki9CaI3HzIownwjzYS5xWUaokTA==
 
+canvas2video@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/canvas2video/-/canvas2video-1.1.4.tgz#189e38699c3228cd105148986c132c29a30b9bc1"
+  integrity sha512-kTg/O9m1nVjhDPzX9iQO9mrJUstfazLxudhyB0sfehxHu8Bpk0+J7zpDZVjCtZ3J6iNXsUtNYF0+cdmLW48aiA==
+
 codejar@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/codejar/-/codejar-4.2.0.tgz#ad72aa63f794a16900a1b079eaf44acae84460ca"
