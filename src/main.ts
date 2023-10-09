@@ -6,7 +6,29 @@ import {save} from "./download";
 import { Pane } from "tweakpane";
 import { BindingApi } from "@tweakpane/core";
 
-const regl = createREGL();
+document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
+  <div class="editor"></div>
+  <canvas></canvas>
+`;
+
+const canvas = document.querySelector<HTMLCanvasElement>("canvas")!;
+
+const regl = createREGL(canvas);
+
+function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement) {
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+}
+
+window.addEventListener("resize", () => {
+  resizeCanvasToDisplaySize(canvas);
+});
+
+resizeCanvasToDisplaySize(canvas);
 
 const pallete = [
   `[[0.938 0.328 0.718] [0.659 0.438 0.328] [0.388 0.388 0.296] [2.538 2.478 0.168]]`,
@@ -48,12 +70,6 @@ export const palette = [
   [0x56, 0x6c, 0x86],
   [0x33, 0x3c, 0x57],
 ];
-
-document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <div>
-    <div class="editor"></div>
-  </div>
-`;
 
 const code = {
   value: `
