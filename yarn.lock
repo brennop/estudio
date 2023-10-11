@@ -112,20 +112,10 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.18.20.tgz#786c5f41f043b07afb1af37683d7c33668858f6d"
   integrity sha512-kTdfRcSiDfQca/y9QIkng02avJ+NCaQvrMejlsB3RRv5sE9rRoeBPISaZpKxHELzRxZyLvNts1P27W3wV+8geQ==
 
-"@pangenerator/tweakpane-textarea-plugin@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@pangenerator/tweakpane-textarea-plugin/-/tweakpane-textarea-plugin-1.0.4.tgz#5addc669b261da9610370b5429b0b3e1c1955a3e"
-  integrity sha512-fVQJBT456ssOFVcJiqduzQVLVqw4lAItx6hwaVOsUe9+hyKFhWUqcHi93lGcGOtDz3YhSKhfyIJPKOzwTCNiGw==
-
 "@tweakpane/core@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@tweakpane/core/-/core-2.0.1.tgz#358d4396d65ae7787e5c92601f6cf657dcb2833b"
   integrity sha512-iJNrLrLffQR0I8mWgAWcMVO9ZPNdNeXZl66WNT+Op5L9FW7BSF6lwG3izR6Ki9CaI3HzIownwjzYS5xWUaokTA==
-
-canvas2video@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/canvas2video/-/canvas2video-1.1.4.tgz#189e38699c3228cd105148986c132c29a30b9bc1"
-  integrity sha512-kTg/O9m1nVjhDPzX9iQO9mrJUstfazLxudhyB0sfehxHu8Bpk0+J7zpDZVjCtZ3J6iNXsUtNYF0+cdmLW48aiA==
 
 codejar@^4.2.0:
   version "4.2.0"
