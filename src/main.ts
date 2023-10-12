@@ -1,10 +1,16 @@
 import "./style.css";
 import createREGL from "regl";
 import { CodeJar } from "codejar";
-import {save} from "./download";
+import { save } from "./download";
 
 import { Pane } from "tweakpane";
 import { BindingApi } from "@tweakpane/core";
+
+import hljs from "highlight.js/lib/core";
+import glsl from "highlight.js/lib/languages/glsl";
+import "highlight.js/styles/atom-one-dark.css";
+
+hljs.registerLanguage("glsl", glsl);
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="editor"></div>
@@ -106,7 +112,12 @@ pane.addBinding(code, "resolution", {
   step: 1,
 })
 
-const editor = CodeJar(document.querySelector(".editor")!, () => { })
+const editor = CodeJar(document.querySelector(".editor")!, (editor) => {
+  editor.removeAttribute("data-highlighted");
+  return hljs.highlightElement(editor);
+}, {
+  tab: "  ",
+})
 
 editor.updateCode(code.value);
 
@@ -121,8 +132,6 @@ editor.onUpdate((value) => {
       const [_, type, name] = line.match(/uniform\s+(float|vec2|vec3|vec4)\s+(\w+)/)!;
       return { type, name };
     });
-
-    console.log(uniforms);
 
     // add uniforms to pane
     uniforms?.forEach(({ type, name }) => {
