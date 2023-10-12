@@ -170,6 +170,7 @@ editor.onUpdate((value) => {
 
 const getDraw = (code: string, coeffs: number[][]) => {
   const uniforms = Object.fromEntries(
+    // @ts-ignore
     Object.keys(params).map((key) => [key, regl.prop(key)])
   );
 
@@ -241,6 +242,7 @@ const getDraw = (code: string, coeffs: number[][]) => {
       coeffsB: coeffs[1],
       coeffsC: coeffs[2],
       coeffsD: coeffs[3],
+      // @ts-ignore
       resolution: regl.prop("resolution"),
       ...uniforms,
     },
@@ -269,15 +271,15 @@ regl.frame(() => {
         return [key, value];
       }
 
-      if ("z" in value) {
+      if ("z" in value && "x" in value && "y" in value) {
         return [key, [value.x, value.y, value.z]];
       }
 
-      if ("a" in value) {
+      if ("a" in value && "r" in value && "g" in value && "b" in value) {
         return [key, [value.r, value.g, value.b, value.a]];
       }
 
-      if ("y" in value) {
+      if ("y" in value && "x" in value) {
         return [key, [value.x, value.y]];
       }
 
