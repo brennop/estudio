@@ -88,6 +88,12 @@ float getValue(float x, float y, float t) {
   resolution: 7,
 };
 
+const hardware = {
+  A0: 0,
+  A1: 0,
+  A2: 0,
+};
+
 const params = {} as any;
 const bindings: Record<string, BindingApi> = {}
 
@@ -192,6 +198,10 @@ const getDraw = (code: string, coeffs: number[][]) => {
   uniform vec3 coeffsC;
   uniform vec3 coeffsD;
 
+  uniform float a0;
+  uniform float a1;
+  uniform float a2;
+
   ${code}
 
   vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
@@ -203,7 +213,7 @@ const getDraw = (code: string, coeffs: number[][]) => {
   void main () {
     float x = floor(uv.x * SIZE) / SIZE;
     float y = floor(-uv.y * SIZE) / SIZE;
-    float t = time * 3.;
+    float t = time * 1.;
     float i = x * SIZE * 2. + y;
 
     float bayerValue = texture2D(bayer, vec2(
@@ -244,6 +254,12 @@ const getDraw = (code: string, coeffs: number[][]) => {
       coeffsD: coeffs[3],
       // @ts-ignore
       resolution: regl.prop("resolution"),
+      // @ts-ignore
+      a0: regl.prop("A0"),
+      // @ts-ignore
+      a1: regl.prop("A1"),
+      // @ts-ignore
+      a2: regl.prop("A2"),
       ...uniforms,
     },
     count: 6,
@@ -287,7 +303,22 @@ regl.frame(() => {
     })
   );
 
-  _params.resolution = Math.pow(2, code.resolution);
+  code.draw({
+    ..._params,
+    resolution: Math.pow(2, code.resolution),
+    ...hardware,
+  });
+});
 
-  code.draw(_params);
+// connect to localhost:8080 ws
+const ws = new WebSocket("ws://localhost:8080");
+
+ws.addEventListener("message", (e) => {
+  try {
+    const data = JSON.parse(e.data);
+    const { A0, A1, A2 } = data;
+    hardware.A0 = A0 / 1024;
+    hardware.A1 = A1 / 1024;
+    hardware.A2 = A2 / 1024;
+  } catch (e) { }
 });
